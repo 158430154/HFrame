@@ -61,12 +61,12 @@ class HFileUpload {
         }
 
         //2.保存文件
-        $temp_path = $this->_file_dir.'/'.date('Y/m/d').'/'.uniqid().'/'.$this->_file['name'];
-        $file_path = $this->_base_path.'/'.$temp_path;
+        $dir_path = $this->_file_dir.'/'.date('Y/m/d').'/'.uniqid();
+        $file_path = $this->_base_path.'/'.$dir_path.'/'.$this->_file['name'];
         $this->_res_data['path'] = $file_path;
-        $this->_res_data['url'] = $this->_base_url.'/'.$temp_path;
+        $this->_res_data['url'] = $this->_base_url.'/'.$dir_path.'/'.$this->_file['name'];
 
-        if(!$this->_mkDir($file_path)){
+        if(!$this->_makeDir($dir_path)){
             $this->_res_data['msg'] = '目录创建失败';
             return $this->_res_data;
         }
@@ -143,9 +143,9 @@ class HFileUpload {
      * @param string $dir 目录字符串
      * @return bool
      */
-    private function _mkDir($dir) {
+    private function _makeDir($dir) {
         if (!is_dir($dir)) {
-            if($this->makeDir(dirname($dir))) {
+            if($this->_makeDir(dirname($dir))) {
                 return mkdir($dir);
             }
             return false;
@@ -159,6 +159,9 @@ class HFileUpload {
      */
     private function _getError(){
         $error = $this->_file['error'];
+        if($this->_file === false){
+            return '没有获取到文件';
+        }
         $error_data = array(
             1 => '文件大小超过服务器配置大小',
             2 => '文件大小超过HTML表单大小',

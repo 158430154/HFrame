@@ -9,4 +9,15 @@
     <div id="err_msg"></div>
     <a id="btn_login" href="javascript:;">登录</a>
     <div id="copyright">© 2015</div>
+
+    <div class="upload_demo" style="margin-top: 50px;">
+        <form action="<?php echo $this->genurl('Upload/file'); ?>" method="post" enctype="multipart/form-data">
+
+            文件上传DEMO
+            <input type="file" name="file_key">
+            <input type="hidden" name="file_key" value="file_key">
+
+            <button type="submit">点击上传</button>
+        </form>
+    </div>
 </div>
