@@ -55,6 +55,16 @@ class H{
         /*--日志相关开始--*/
         'is_log' => true,//是否需要记录日志
         /*--日志相关结束--*/
+
+        /*--文件上传相关开始--*/
+        'file_upload' => array(
+            'file_name' => 'files',//上传文件的目录名称
+            'max_size' => 2097152,//上传最大限制 默认2M; 0表示不限制上传大小
+            'allow_files' => array(//定义允许上传的文件扩展名 和 对应的类型
+                'image' => array('gif', 'jpg', 'jpeg', 'png', 'bmp')
+            )
+        ),
+        /*--文件上传相关结束--*/
     );
 
     function __construct(){
@@ -115,7 +125,8 @@ class H{
         'HTTPException' => 'Exception/HTTPException.php',
         'HLog' => 'Log/HLog.php',
         'HSession' => 'Extends/HSession.php',
-        'HCookie' => 'Extends/HCookie.php'
+        'HCookie' => 'Extends/HCookie.php',
+        'HFileUpload' => 'Extends/HFileUpload.php'
     );
 
     //初始化核心代码
