@@ -22,7 +22,7 @@ class HFileUpload {
         'thumburl' => ''//文件为图片且需要缩略图的时候才会有
     );
 
-    public static $_HF = null;
+    private static $_HF = null;
 
     /**
      * 实例化模型
@@ -44,9 +44,19 @@ class HFileUpload {
         return self::$_HF;
     }
 
-    public function save($file_name,$param = array()) {
+    /**
+     * 保存上传的文件
+     * @param string $file_key 获取文件的KEY名
+     * @param array $param 参数
+     *              array(
+     *                  'width' => 100, //缩略图宽
+     *                  'height' => 100 //缩略图高
+     *              )
+     * @return array
+     */
+    public function save($file_key,$param = array()) {
         //1.获取文件
-        if(!$this->_getFile($file_name)){
+        if(!$this->_getFile($file_key)){
             return $this->_res_data;
         }
 
@@ -80,11 +90,11 @@ class HFileUpload {
 
     /**
      * 获取文件
-     * @param string $file_name 获取文件的KEY名
+     * @param string $file_key 获取文件的KEY名
      * @return bool
      */
-    private function _getFile($file_name) {
-        $this->_file = isset($_FILES[$file_name])?$_FILES[$file_name]:false;
+    private function _getFile($file_key) {
+        $this->_file = isset($_FILES[$file_key])?$_FILES[$file_key]:false;
         if(!$this->_file){
             $this->_res_data['msg'] = $this->_getError();
         }
