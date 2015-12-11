@@ -89,6 +89,16 @@ class HModel {
     }
 
     /**
+     * 执行SQL语句
+     * @param string $sql
+     * @param array $param
+     * @return array|mixed
+     */
+    public function querySql($sql,$param = array()){
+        return HPdo::instance()->querySql($sql,$param);
+    }
+
+    /**
      * 查询多条数据
      * @param array $option
      *              array(
