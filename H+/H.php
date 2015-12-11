@@ -278,8 +278,8 @@ class H{
         }elseif($this->_h_config['is_log']){
             $log = 'Exception Code['.$code.'] Msg['.$exception->getMessage().'] '.$exception->getFile().' on line '.$exception->getLine();
             HLog::model()->add($log,HLog::LEVEL_ERROR);
-            HLog::model()->save();
         }
+        H::app()->end();
     }
 
     /**
@@ -294,21 +294,24 @@ class H{
             //$trace = debug_backtrace();//需要时候再用
             $log = 'Error Code['.$code.'] Msg['.$message.'] '.$file.' on line '.$line;
             HLog::model()->add($log,HLog::LEVEL_ERROR);
+        }else{
             Controller::renderErr($message,$file,$line);
-            H::app()->end();
         }
+        H::app()->end();
     }
 
     /**
      * 致命错误处理
      */
     public function handleFatalError(){
-        if($this->_h_config['is_log']){
-            $error = error_get_last();
-            if($error){
+        $error = error_get_last();
+        if($error){
+            if($this->_h_config['is_log']){
                 $log = 'FatalError Type['.$error['type'].'] Msg['.$error['message'].'] '.$error['file'].' on line '.$error['line'];
                 HLog::model()->add($log,HLog::LEVEL_ERROR);
                 HLog::model()->save();
+            }else{
+                Controller::renderErr($error['message'],$error['file'],$error['line']);
             }
         }
     }
