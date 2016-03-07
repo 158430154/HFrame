@@ -14,64 +14,35 @@ class H{
     public $log_path = '';//日志路径
     public $view_path = '';//视图路径
 
-    private $controller_path = '';//控制器路径
-
     //配置项
-    private $_h_config = array(
-        /*--项目相关开始--*/
-        'app_name' => '',//项目名称
-        /*--项目相关结束--*/
+    private $_h_config = array();
 
-        /*--数据库相关开始--*/
-        'db' => array(
-            'dsn' => 'mysql:host=127.0.0.1;port=3306;dbname=test',//数据库IP和端口(端口可以省略 如果是默认端口的话) 数据库名称
-            'username' => 'root',//用户名
-            'password' => '123456',//密码
-            'table_prefix' => 't_'//表前缀
-        ),
-        /*--数据库相关结束--*/
-
-        /*--框架目录结构相关开始--*/
-        'app_file_name' => 'app',//APP文件夹名称
-        'log_file_name' => 'log',//日志文件夹名称
-        'controller_file_name' => 'controller',//控制器文件夹名称
-        'view_file_name' => 'view',//视图文件夹名称
-        /*--框架目录结构相关结束--*/
-
-        /*--路由相关开始--*/
-        'is_param_route' => false,//是否为参数路由
-        'param_route_key' => 'a',//参数路由的获取关键字
-        'param_route_separator' => '_',//参数路由的分割符
-        'controller' => 'index',//默认控制器
-        'action' => 'index',//默认方法
-        /*--路由相关结束--*/
-
-        /*--自动加载相关开始--*/
-        'auto_import' => array(
-            'models'
-        ),
-        /*--自动加载相关结束--*/
-
-        /*--日志相关开始--*/
-        'is_log' => true,//是否需要记录日志
-        /*--日志相关结束--*/
-
-        /*--文件上传相关开始--*/
-        'file_upload' => array(
-            'file_name' => 'files',//上传文件的目录名称
-            'max_size' => 2097152,//上传最大限制 默认2M; 0表示不限制上传大小
-            'allow_files' => array(//定义允许上传的文件扩展名 和 对应的类型
-                'image' => array('gif', 'jpg', 'jpeg', 'png', 'bmp')
-            )
-        ),
-        /*--文件上传相关结束--*/
-    );
+    /**
+     * 应用初始化
+     * @return H
+     */
+    public static function app(){
+        if(self::$_h_app === null){
+            self::$_h_app = new H();
+        }
+        return self::$_h_app;
+    }
 
     function __construct(){
+        $this->initCore();
         $this->initSystemSetting();
         $this->initConfigSetting();
-        $this->initCore();
         $this->initCommon();
+    }
+
+    //初始化核心代码
+    private function initCore(){
+        //自动加载
+        include $this->h_base_path.'/Init/Autoloader.php';
+        //AppHandler
+        include $this->h_base_path.'/Init/AppHandler.php';
+        //基类控制器
+        include $this->h_base_path.'/Core/Controller/Controller.php';
     }
 
     //初始化系统设置
@@ -85,11 +56,12 @@ class H{
         header('Content-type: text/html; charset=utf-8');
 
         //注册自动加载
-        spl_autoload_register(array($this,'loader'));
+        $autoloader = new Autoloader();
+        $autoloader->init();
 
-        set_exception_handler(array($this,'handleException'));//异常回调
-        set_error_handler(array($this,'handleError'),error_reporting());//错误回调
-        register_shutdown_function(array($this,'handleFatalError'));//致命错误回调
+        //注册 异常 错误 致命错误 的回调
+        $app_handler = new AppHandler();
+        $app_handler->init();
     }
 
     //初始化路径相关
@@ -99,9 +71,9 @@ class H{
         //项目根路径
         $this->base_path = H_APP_PATH;
         //配置项初始化
+        $default_config = include $this->h_base_path.'/Init/DefaultConfig.php';
         $user_config = include $this->base_path.'/config/conf.php';
-        $this->_h_config = array_merge($this->_h_config,$user_config);
-        unset($user_config);
+        $this->_h_config = array_merge($default_config,$user_config);
         //其它相关路径
         $this->app_path = $this->base_path.'/'.$this->_h_config['app_file_name'];
         $this->base_url = dirname($_SERVER['SCRIPT_NAME']);
@@ -111,61 +83,12 @@ class H{
         $this->public_url = $this->base_url.'/public';
         $this->file_url = $this->base_url.'/files';
         $this->log_path = $this->app_path.'/'.$this->_h_config['log_file_name'];
-        $this->controller_path = $this->app_path.'/'.$this->_h_config['controller_file_name'];
         $this->view_path = $this->app_path.'/'.$this->_h_config['view_file_name'];
-    }
-
-    //核心自动加载列表
-    private $core_auto_import = array(
-        'HModel' => 'Db/HModel.php',
-        'HPdo' => 'Db/HPdo.php',
-        'HTransaction' => 'Db/HTransaction.php',
-        'DBException' => 'Exception/DBException.php',
-        'HException' => 'Exception/HException.php',
-        'HTTPException' => 'Exception/HTTPException.php',
-        'HLog' => 'Log/HLog.php',
-        'HSession' => 'Extends/HSession.php',
-        'HCookie' => 'Extends/HCookie.php',
-        'HFileUpload' => 'Extends/HFileUpload.php'
-    );
-
-    //初始化核心代码
-    private function initCore(){
-        //基类控制器
-        include $this->h_base_path.'/Core/Controller/Controller.php';
     }
 
     //引用框架外常用方法
     private function initCommon(){
         include $this->h_base_path.'/Common/Function.php';
-    }
-
-    /**
-     * 自动加载
-     * @param string $class_name 类名
-     */
-    private function loader($class_name){
-        if(isset($this->core_auto_import[$class_name])){//核心列表
-            include $this->h_base_path.'/Core/'.$this->core_auto_import[$class_name];
-        }else{//文件夹
-            foreach($this->_h_config['auto_import'] as $file_name){
-                $path = $this->app_path.'/'.$file_name.'/'.$class_name.'.php';
-                if(file_exists($path)){
-                    include $path;
-                }
-            }
-        }
-    }
-
-    /**
-     * 应用初始化
-     * @return H
-     */
-    public static function app(){
-        if(self::$_h_app === null){
-            self::$_h_app = new H();
-        }
-        return self::$_h_app;
     }
 
     /**
@@ -179,6 +102,15 @@ class H{
 
     //运行程序
     public function run(){
+        list($controller,$action) = $this->getRouteParams();
+
+        $this->runController($controller,$action);
+
+        $this->end();
+    }
+
+    //获取路由参数
+    private function getRouteParams(){
         $route_arr = array();
         //是否为参数路由
         if($this->_h_config['is_param_route']){
@@ -203,14 +135,13 @@ class H{
                 $route_arr = explode('/',$route_str);
             }
         }
+
         //控制器
         $controller = (isset($route_arr[0]) && $route_arr[0])?$route_arr[0]:$this->_h_config['controller'];
         //方法
         $action = (isset($route_arr[1]) && $route_arr[1])?$route_arr[1]:$this->_h_config['action'];
 
-        $this->runController($controller,$action);
-
-        $this->end();
+        return array($controller,$action);
     }
 
     /**
@@ -264,56 +195,6 @@ class H{
             HLog::model()->save();
         }
         exit;
-    }
-
-    /**
-     * 异常处理
-     * @param HException $exception
-     */
-    public function handleException($exception){
-        $code = $exception->getCode();
-        //服务器错误
-        if($code == 500){
-            Controller::renderErr($exception->getMessage(),$exception->getFile(),$exception->getLine(),$exception->data);
-        }elseif($this->_h_config['is_log']){
-            $log = 'Exception Code['.$code.'] Msg['.$exception->getMessage().'] '.$exception->getFile().' on line '.$exception->getLine();
-            HLog::model()->add($log,HLog::LEVEL_ERROR);
-        }
-        H::app()->end();
-    }
-
-    /**
-     * 错误处理
-     * @param int $code 错误码
-     * @param string $message 错误消息
-     * @param string $file 错误文件
-     * @param int $line 错误行
-     */
-    public function handleError($code,$message,$file,$line){
-        if($this->_h_config['is_log']){
-            //$trace = debug_backtrace();//需要时候再用
-            $log = 'Error Code['.$code.'] Msg['.$message.'] '.$file.' on line '.$line;
-            HLog::model()->add($log,HLog::LEVEL_ERROR);
-        }else{
-            Controller::renderErr($message,$file,$line);
-        }
-        H::app()->end();
-    }
-
-    /**
-     * 致命错误处理
-     */
-    public function handleFatalError(){
-        $error = error_get_last();
-        if($error){
-            if($this->_h_config['is_log']){
-                $log = 'FatalError Type['.$error['type'].'] Msg['.$error['message'].'] '.$error['file'].' on line '.$error['line'];
-                HLog::model()->add($log,HLog::LEVEL_ERROR);
-                HLog::model()->save();
-            }else{
-                Controller::renderErr($error['message'],$error['file'],$error['line']);
-            }
-        }
     }
 
 }
