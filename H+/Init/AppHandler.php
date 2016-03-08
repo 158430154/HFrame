@@ -12,7 +12,7 @@ class AppHandler {
      * 异常处理
      * @param HException $exception
      */
-    private function handleException($exception){
+    public function handleException($exception){
         $code = $exception->getCode();
         //服务器错误
         if($code == 500){
@@ -31,7 +31,7 @@ class AppHandler {
      * @param string $file 错误文件
      * @param int $line 错误行
      */
-    private function handleError($code,$message,$file,$line){
+    public function handleError($code,$message,$file,$line){
         if(H::getConfig('is_log')){
             //$trace = debug_backtrace();//需要时候再用
             $log = 'Error Code['.$code.'] Msg['.$message.'] '.$file.' on line '.$line;

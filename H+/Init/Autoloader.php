@@ -27,12 +27,10 @@ class Autoloader {
     private function loader($class_name){
         if(isset($this->core_auto_import[$class_name])){//核心列表
             include H::app()->h_base_path.'/Core/'.$this->core_auto_import[$class_name];
-        }else{//文件夹
-            foreach($this->_h_config['auto_import'] as $file_name){
-                $path = H::app()->app_path.'/'.$file_name.'/'.$class_name.'.php';
-                if(file_exists($path)){
-                    include $path;
-                }
+        }else{//项目文件
+            $path = H::app()->app_path.'/'.$class_name.'.php';
+            if(file_exists($path)){
+                include $path;
             }
         }
     }

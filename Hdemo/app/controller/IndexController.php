@@ -1,5 +1,8 @@
 <?php
 
+use models\User;
+use models\test2\Test;
+
 class IndexController extends Controller{
 
     public function actionIndex(){
@@ -16,22 +19,8 @@ class IndexController extends Controller{
     }
 
     public function actionTest2(){
-        ob_start();
-
         $test = new Test();
-
         $test->say();
-
-        $this->render(array(
-            'params' => '传递参数测试'
-        ));
-
-        $aaa = ob_get_contents();
-        ob_end_clean();
-
-
-        //1xxxxx.md5()
-        echo $aaa;
     }
 
 }

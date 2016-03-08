@@ -1,5 +1,8 @@
 <?php
 
+namespace models\test2;
+use HModel;
+
 class Test extends HModel{
 
     public function say(){

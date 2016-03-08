@@ -17,8 +17,5 @@ return array(
     'param_route_separator' => '_',//参数路由的分割符
     'controller' => 'index',//默认控制器
     'action' => 'index',//默认方法
-    'auto_import' => array(
-        'models'
-    ),
     'is_log' => false//是否需要记录日志
 );
