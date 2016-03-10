@@ -8,7 +8,7 @@
     </div>
     <div id="err_msg"></div>
     <a id="btn_login" href="javascript:;">登录</a>
-    <div id="copyright">© 2015</div>
+    <div id="copyright">© 2016</div>
 
     <div class="upload_demo" style="margin-top: 50px;">
         <form action="<?php echo $this->genurl('Upload/file'); ?>" method="post" enctype="multipart/form-data">
